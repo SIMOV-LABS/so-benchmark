@@ -2,21 +2,21 @@ config {
   type: "table",
   schema: "gold",
   name: "mart_activity_monthly",
-  description: "Capa Gold - actividad mensual agregada de Stack Overflow. Listo para BI y reportes ejecutivos. 171 registros de 2008 a 2022.",
+  description: "Gold layer - monthly aggregated activity from Stack Overflow. Ready for BI and executive reporting. 171 records from 2008 to 2022.",
   columns: {
-    year_month: "Año y mes en formato YYYY-MM. Clave principal del mart",
-    year: "Año de la actividad",
-    quarter: "Trimestre (1-4)",
-    total_questions: "Total de preguntas publicadas en el mes",
-    answered_questions: "Preguntas que recibieron una respuesta aceptada",
-    answer_rate_pct: "Porcentaje de preguntas con respuesta aceptada sobre el total",
-    avg_score: "Score promedio de las preguntas del mes",
-    avg_views: "Promedio de vistas por pregunta en el mes",
-    high_impact_count: "Preguntas con más de 10,000 vistas en el mes",
-    low_quality_count: "Preguntas con score menor a -5 en el mes",
-    avg_engagement_ratio: "Promedio del ratio (answers + comments) / views del mes",
-    avg_days_since_created: "Promedio de días desde publicación hasta hoy",
-    _gold_computed_at: "Timestamp de cuando fue calculado este mart"
+    year_month: "Year and month in YYYY-MM format. Primary key of the mart",
+    year: "Activity year",
+    quarter: "Quarter of the year (1-4)",
+    total_questions: "Total questions published in the month",
+    answered_questions: "Questions that received an accepted answer",
+    answer_rate_pct: "Percentage of questions with an accepted answer over total",
+    avg_score: "Average score of questions in the month",
+    avg_views: "Average views per question in the month",
+    high_impact_count: "Questions with more than 10,000 views in the month",
+    low_quality_count: "Questions with a score below -5 in the month",
+    avg_engagement_ratio: "Average ratio of (answers + comments) / views for the month",
+    avg_days_since_created: "Average days since publication until today",
+    _gold_computed_at: "Timestamp when this mart was computed"
   }
 }
 
