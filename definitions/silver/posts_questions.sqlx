@@ -1,0 +1,68 @@
+config {
+  type: "table",
+  schema: "silver",
+  name: "posts_questions",
+  description: "Capa Silver - preguntas de Stack Overflow limpias y enriquecidas. Fuente: bronze.posts_questions",
+  bigquery: {
+    partitionBy: "TIMESTAMP_TRUNC(creation_date, YEAR)"
+  },
+  columns: {
+    id: "ID único de la pregunta en Stack Overflow",
+    title: "Título de la pregunta limpio sin espacios extras",
+    creation_date: "Fecha y hora de publicación en UTC",
+    year_month: "Año y mes en formato YYYY-MM para agrupaciones temporales",
+    year: "Año de publicación extraído de creation_date",
+    quarter: "Trimestre de publicación (1-4)",
+    score: "Votos netos de la pregunta (upvotes - downvotes)",
+    is_positive_score: "True si el score es mayor o igual a cero",
+    view_count: "Número total de vistas de la pregunta",
+    answer_count: "Número de respuestas recibidas",
+    comment_count: "Número de comentarios recibidos",
+    has_accepted_answer: "True si la pregunta tiene una respuesta marcada como aceptada",
+    tags_array: "Array de tags asociados a la pregunta separados originalmente por pipe",
+    tag_count: "Número de tags asignados a la pregunta",
+    owner_user_id: "ID del usuario autor de la pregunta. Puede ser nulo para preguntas anónimas",
+    has_owner: "True si la pregunta tiene un autor identificado",
+    quality_tier: "Clasificación de calidad: high_impact, low_quality o normal",
+    engagement_ratio: "Ratio de engagement calculado como (answers + comments) / views",
+    days_since_created: "Días transcurridos desde la publicación hasta hoy",
+    _ingested_at: "Timestamp de cuando el registro fue cargado en Bronze",
+    _batch_id: "ID único del proceso de carga en Bronze",
+    _row_hash: "Hash MD5 de campos clave para detección de cambios",
+    _silver_processed_at: "Timestamp de cuando el registro fue procesado en Silver"
+  }
+}
+
+SELECT
+  id,
+  TRIM(title)                               AS title,
+  accepted_answer_id,
+  answer_count,
+  comment_count,
+  creation_date,
+  TIMESTAMP_TRUNC(creation_date, YEAR)      AS creation_year,
+  FORMAT_TIMESTAMP('%Y-%m', creation_date)  AS year_month,
+  EXTRACT(YEAR FROM creation_date)          AS year,
+  EXTRACT(QUARTER FROM creation_date)       AS quarter,
+  favorite_count,
+  last_activity_date,
+  owner_user_id,
+  owner_user_id IS NOT NULL                 AS has_owner,
+  score,
+  score >= 0                                AS is_positive_score,
+  view_count,
+  SPLIT(tags, '|')                          AS tags_array,
+  ARRAY_LENGTH(SPLIT(tags, '|'))            AS tag_count,
+  accepted_answer_id IS NOT NULL            AS has_accepted_answer,
+  DATE_DIFF(CURRENT_DATE(), DATE(creation_date), DAY) AS days_since_created,
+  SAFE_DIVIDE(answer_count + comment_count, view_count) AS engagement_ratio,
+  CASE
+    WHEN score < -5          THEN 'low_quality'
+    WHEN view_count > 10000  THEN 'high_impact'
+    ELSE                          'normal'
+  END                                       AS quality_tier,
+  _ingested_at,
+  _batch_id,
+  _row_hash,
+  CURRENT_TIMESTAMP()                       AS _silver_processed_at
+FROM ${ref("bronze", "posts_questions")}
